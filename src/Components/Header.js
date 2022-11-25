@@ -1,16 +1,27 @@
 import React from 'react';
 import Image from "next/image";
 import { MenuIcon, SearchIcon, ShoppingCartIcon } from '@heroicons/react/outline';
+import { useSession, signIn, signOut } from "next-auth/react"
+import {useRouter} from "next/router"
+import { useSelector } from "react-redux";
+import { selectItems } from "../slices/basketSlice";
 
 
 const Header = () => {
+  const { data: session } = useSession();
+  const items = useSelector(selectItems);
+  const date = new Date;
+  let hours = date.getHours();
+  let Greetings = (hours < 6)? " Good Morning" :
+               ((hours <= 18 && hours >= 6 ) ? "Good Afternoon" : " Good Evening");
+  const router = useRouter();
   return (
-    <header>
+    <header className="sticky top-0 z-50">
 
       {/* top nav */}
       <div className="flex items-center bg-amazon_blue p-1 flex-grow py-2">
         <div className='mt-2 flex items-center flex-grow sm:flex-grow-0' >
-          <Image
+          <Image onClick={()=>router.push('/')}
             src='https://links.papareact.com/f90'
             width={150}
             height={40}
@@ -23,52 +34,58 @@ const Header = () => {
           <input className="p-2 w-6 flex-grow  h-10 rounded-l-md  focus:outline-none   flex-shrink" type="text" placeholder='Search Items' />
           <SearchIcon className='h-12 p-4' />
         </div>
-        {/* right */}
-        <div className='text-white flex items-center text-xs space-x-6 mx-6  whitespace-nowrap'>
 
-          <div className='link'>
-            <p className='font-extrabold md:text-xs cursor-pointer'>Hello Account Holder</p>
+
+        {/* right//Log in below */}
+        <div className="flex items-center text-xs text-white space-x-6 mx-6 whitespace-nowrap">
+        <div onClick={!session ?signIn:signOut} 
+        className='cursor-pointer link'>
+            <p className=' hover:underline  '>
+            {session ? ` ${Greetings}, ${session.user.name}` :' sign in for exclusive deals'}
+            </p>
             <p className='font-extrabold md:text-xs cursor-pointer'>Accounts&Lists</p>
+            </div>
+            <div
+            onClick={() => session && router.push("/orders")}
+            className="cursor-pointer link"
+          >
+            <p>Returns</p>
+            <p className="font-extrabold md:text-sm">& Orders</p>
           </div>
 
-          <div className='link'>
-            <p className='font-extrabold md:text-xs cursor-pointer'>Returns</p>
-            <p className='font-extrabold md:text-xs cursor-pointer'>&Orders</p>
+          <div
+            onClick={() => router.push("/checkOut")}
+            className="relative flex items-center cursor-pointer link"
+          >
+            <span className="absolute top-0 right-4 md:right-10 h-2 w-4 bg-yellow-400 text-align-right rounded-full text-black font-bold">
+              {items.length}
+            </span>
 
-          </div>
-          <div className='link relative flex items-center'>
-            <span className='absolute top-0 right-0 md:right-10 h-4 w-4 text-centerrounded-full text-black font-bold bg-yellow-400 '>4</span>
-            <ShoppingCartIcon className='h-10'
-            />
-            <p className=' hidden md:inline-flex font-extrabold md:text-xs cursor-pointer'>Cart</p>
+            <ShoppingCartIcon className="h-10" />
+            <p className="hidden md:inline font-extrabold md:text-sm mt-2">
+              Basket
+            </p>
           </div>
         </div>
       </div>
-      {/* bottom nav */}
 
-      <div className=' space-x-3 p-2 pl-6 cursor-pointer flex items-center bg-amazon_blue-light text-sm text-white'>
-   
-      <p>
-      <MenuIcon className=' link h-6 mr-4 items-center'/>
-      All
-      </p>
-      {/* Mobile view */}
-      <p className='link'>Prime Video</p>
-      <p className='link'>Amazon Business</p>
-      <p className='link'>Today's </p>
-      <p className='link'>Billionaires Club</p>
-      <p className='link hidden lg:inline-flex'>Electronics</p>
-      <p className='link hidden lg:inline-flex'>Food &Grocery</p>
-      <p className='link hidden lg:inline-flex'>Prime</p>
-      <p className='link hidden lg:inline-flex'>Shopper Toolkit</p>
-      <p className='link hidden lg:inline-flex'>Health and Personal</p>
-      <p className='link hidden lg:inline-flex'>Games</p>
-
-
-   
+      {/* Bottom */}
+      <div className="flex items-center space-x-3 p-2 pl-6 bg-amazon_blue-light text-white text-sm">
+        <p className="link flex items-center">
+          <MenuIcon className="h-6 mr-1" /> All
+        </p>
+        <p className="link">Prime Video</p>
+        <p className="link">Amazon Business</p>
+        <p className="link">Today's Deals</p>
+        <p className="link hidden lg:inline-flex">Electronics</p>
+        <p className="link hidden lg:inline-flex">Food & Grocery</p>
+        <p className="link hidden lg:inline-flex">Prime</p>
+        <p className="link hidden lg:inline-flex">Buy Again</p>
+        <p className="link hidden lg:inline-flex">Shopper Toolkit</p>
+        <p className="link hidden lg:inline-flex">Health & Personal Care</p>
       </div>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;
