@@ -2,17 +2,46 @@ import React from 'react'
 import Header from '../Components/Header'
 import Image from "next/image";
 import { useSelector } from 'react-redux';
-import { selectItems } from '../slices/basketSlice';
+import { selectItems,selectTotal } from '../slices/cartSlice';
 import CheckoutProduct from '../Components/CheckoutProduct';
 import { useSession } from "next-auth/react"
+import Currency from "react-currency-formatter"
+import { loadStripe } from '@stripe/stripe-js';
+import axios from 'axios';
+const stripePromise=loadStripe( process.env.stripe_public_key );
+                    //  pass in public key
 
-function checkOut() {
+
+console.log(stripePromise)
+console.log("hello Check out JS")
+
+
+function CheckOut() {
     const items= useSelector(selectItems);
+    const total = useSelector(selectTotal);
     const { data: session } = useSession();
 
 
+// STRIPE CHECKOUT
+    const createCheckoutSession =async() => {
 
-    
+   const stripe = await  stripePromise;
+// Call the backend to create a check out session
+const CheckoutSession = await axios.post('/api/create-checkout-session',
+{
+  items:items,
+  email:session.user.email
+  
+})
+// redirect user to stripe checkout 
+const result=await stripe.redirectToCheckout
+({
+sessionid:CheckoutSession.data.id
+
+})
+if (result.error)alert(result.error.message);
+
+};
   return (
     <div className="bg-gray-100">
     <Header />
@@ -52,28 +81,33 @@ function checkOut() {
       </div>
 
       {/* Right */}
-       <div className="flex flex-col bg-white shadow-sm p-10">
+       <div className="flex flex-col bg-blue shadow-sm p-10">
         {items.length > 0 && (
-          <>
-            <h2 className="whitespace-nowrap">
+          <div>
+            <h2 className="whitespace-nowrap bg-blue-500">
               Subtotal ({items.length} items):{" "}
               <span className="font-bold">
-                {/* <Currency quantity={total} currency="ETB" /> */}
+                <Currency quantity={total} currency="ETB" />
               </span>
+
+                    
+
+
+
+
             </h2>
-            {/* <button
+            <button
               disabled={!session}
-              onClick={createCheckoutSession}
-              role="link"
-              s
+               onClick={createCheckoutSession}
+              
               className={`button mt-2 ${
                 !session &&
-                "from-gray-300 to-gray-500 border-gray-200 text-gray-300 cursor-not-allowed"
+                "from-gray-200 to-gray-500 border-gray-200 text-black-300 cursor-not-allowed"
               }`}
             >
-              {!session ? "Sign In to Checkout" : "Proceed to Checkout"}
-            </button> */}
-          </>
+              {!session ? "Please Sign in or Sign Up for Check out" : "Proceed to Checkout"}
+            </button>
+          </div>
         )}
 
 
@@ -84,5 +118,5 @@ function checkOut() {
 );
 }
 
-export default checkOut;
+export default CheckOut;
 

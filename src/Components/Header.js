@@ -4,7 +4,7 @@ import { MenuIcon, SearchIcon, ShoppingCartIcon } from '@heroicons/react/outline
 import { useSession, signIn, signOut } from "next-auth/react"
 import {useRouter} from "next/router"
 import { useSelector } from "react-redux";
-import { selectItems } from "../slices/basketSlice";
+import { selectItems } from "../slices/cartSlice";
 
 
 const Header = () => {
@@ -12,7 +12,7 @@ const Header = () => {
   const items = useSelector(selectItems);
   const date = new Date;
   let hours = date.getHours();
-  let Greetings = (hours < 6)? " Good Morning" :
+  let Greetings = (hours < 11)? " Good Morning" :
                ((hours <= 18 && hours >= 6 ) ? "Good Afternoon" : " Good Evening");
   const router = useRouter();
   return (
@@ -53,19 +53,27 @@ const Header = () => {
             <p className="font-extrabold md:text-sm">& Orders</p>
           </div>
 
-          <div
-            onClick={() => router.push("/checkOut")}
-            className="relative flex items-center cursor-pointer link"
-          >
-            <span className="absolute top-0 right-4 md:right-10 h-2 w-4 bg-yellow-400 text-align-right rounded-full text-black font-bold">
-              {items.length}
-            </span>
+          <div   
+            
+            className="relative   hidden sm:flex items-center cursor-pointer link  "
+            onClick={() => router.push("/Checkout")}
 
-            <ShoppingCartIcon className="h-10" />
-            <p className="hidden md:inline font-extrabold md:text-sm mt-2">
-              Basket
+          >
+            <p className="absolute top-0 right-4 md:right-10 h-4 w-4  bg-yellow-400  rounded-full  text-black font-bold link ">
+              {items.length}
+            </p>
+
+            <ShoppingCartIcon className="h-12   hidden sm:flex   rounded-md  flex-grow cursor-pointer  link   " 
+
+              
+            />
+            <p className="        hidden md:flex font-extrabold md:text-sm mt-2">
+              Cart
             </p>
           </div>
+
+
+
         </div>
       </div>
 
